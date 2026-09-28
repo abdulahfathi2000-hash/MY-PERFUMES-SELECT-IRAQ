@@ -498,10 +498,7 @@ async function saveCatalog(){
     console.error("SAVE ERROR:", err);
     const code = err?.code || "unknown";
     const message = err?.message || String(err);
-    alert("پاشەکەوتکردن سەرکەوتوو نەبوو.
-
-Error: " + code + "
-" + message);
+    alert("پاشەکەوتکردن سەرکەوتوو نەبوو.\n\nError: " + code + "\n" + message);
   }
 }
 
