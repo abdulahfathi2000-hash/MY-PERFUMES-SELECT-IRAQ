@@ -201,6 +201,7 @@
       <input id="email" type="email" placeholder="Admin email">
       <input id="pw" type="password" placeholder="Password">
       <button class="primary" type="button" onclick="login()">Login</button>
+      <button class="secondary" type="button" onclick="resetAdminPassword()">پاسوۆردم لەبیرچووە</button>
       <div id="loginMsg" class="admin-note">بە هەژماری Admin ـی Firebase بچۆ ژوورەوە.</div>
     </div>
 
@@ -221,7 +222,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import { getFirestore, collection, getDocs, onSnapshot, writeBatch, doc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -350,7 +351,30 @@ async function login(){
     renderAdmin();
   }catch(err){
     console.error(err);
-    showLoginMessage("ئیمەیڵ یان پاسوۆرد هەڵەیە، یان پەیوەندی Firebase کێشەی هەیە.",true);
+    const code = err?.code || "unknown";
+    const messages = {
+      "auth/invalid-credential":"ئیمەیڵ یان پاسوۆرد هەڵەیە.",
+      "auth/user-not-found":"ئەم ئیمەیڵە لە Firebase تۆمار نەکراوە.",
+      "auth/wrong-password":"پاسوۆرد هەڵەیە.",
+      "auth/too-many-requests":"هەوڵی زۆر دراوە؛ کەمێک چاوەڕێ بکە و دووبارە هەوڵ بدە.",
+      "auth/network-request-failed":"پەیوەندی ئینتەرنێت یان Firebase کێشەی هەیە.",
+      "auth/operation-not-allowed":"Email/Password لە Firebase Enable نییە.",
+      "auth/unauthorized-domain":"Domain ـی GitHub Pages لە Authorized domains زیاد نەکراوە."
+    };
+    showLoginMessage((messages[code] || "Firebase Login هەڵەیە.") + " [" + code + "]", true);
+  }
+}
+
+async function resetAdminPassword(){
+  const email=document.getElementById("email").value.trim();
+  if(!email){showLoginMessage("سەرەتا ئیمەیڵەکەت بنووسە.",true);return}
+  try{
+    await sendPasswordResetEmail(auth,email);
+    showLoginMessage("لینکی گۆڕینی پاسوۆرد بۆ ئیمەیڵەکەت نێردرا ✓");
+  }catch(err){
+    console.error(err);
+    const code=err?.code||"unknown";
+    showLoginMessage("ناردنی لینک سەرکەوتوو نەبوو ["+code+"]",true);
   }
 }
 
@@ -498,6 +522,7 @@ window.toggleLang=toggleLang;
 window.openAdmin=openAdmin;
 window.closeAdmin=closeAdmin;
 window.login=login;
+window.resetAdminPassword=resetAdminPassword;
 window.logoutAdmin=logoutAdmin;
 window.renderAdmin=renderAdmin;
 window.updateItem=updateItem;
