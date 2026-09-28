@@ -437,10 +437,10 @@ function deleteItem(i){
 
 async function seedInitialCatalogIfEmpty(){
   const snap = await getDocs(productsRef);
-  const visibleDocs = snap.docs.filter(d => d.id !== "__meta__");
+  const visibleDocs = snap.docs.filter(d => d.id !== "site_meta");
   if(visibleDocs.length || !initialCatalog.length) return;
 
-  await setDoc(doc(db,"products","__meta__"), {hidden:true, initialized:true});
+  await setDoc(doc(db,"products","site_meta"), {hidden:true, initialized:true});
   for (let i = 0; i < initialCatalog.length; i++) {
     const x = {...initialCatalog[i], order:i};
     await setDoc(doc(db,"products",x.id), x);
@@ -463,12 +463,12 @@ async function saveCatalog(){
     });
 
     for (const d of old.docs) {
-      if (d.id !== "__meta__" && !desiredIds.has(d.id)) {
+      if (d.id !== "site_meta" && !desiredIds.has(d.id)) {
         await deleteDoc(d.ref);
       }
     }
 
-    await setDoc(doc(db,"products","__meta__"), {hidden:true, initialized:true});
+    await setDoc(doc(db,"products","site_meta"), {hidden:true, initialized:true});
 
     for (let i = 0; i < catalog.length; i++) {
       const x = catalog[i];
@@ -512,7 +512,7 @@ function startFirestoreListener(){
   onSnapshot(productsRef,snapshot=>{
     if(!snapshot.empty){
       catalog=snapshot.docs
-        .filter(d=>d.id!=="__meta__"&&!d.data().hidden)
+        .filter(d=>d.id!=="site_meta"&&!d.data().hidden)
         .map(d=>({id:d.id,...d.data()}))
         .sort((a,b)=>Number(a.order??999999)-Number(b.order??999999));
     }else{
