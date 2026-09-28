@@ -223,7 +223,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, onSnapshot, writeBatch, doc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBwkDM0p7-l4PATjdOdzdtilvGadW78qK4",
@@ -436,39 +436,72 @@ function deleteItem(i){
 }
 
 async function seedInitialCatalogIfEmpty(){
-  const snap=await getDocs(productsRef);
-  if(!snap.empty||!initialCatalog.length)return;
-  const batch=writeBatch(db);
-  batch.set(doc(db,"products","__meta__"),{hidden:true,initialized:true});
-  initialCatalog.forEach((x,i)=>batch.set(doc(db,"products",x.id),{...x,order:i}));
-  await batch.commit();
+  const snap = await getDocs(productsRef);
+  const visibleDocs = snap.docs.filter(d => d.id !== "__meta__");
+  if(visibleDocs.length || !initialCatalog.length) return;
+
+  await setDoc(doc(db,"products","__meta__"), {hidden:true, initialized:true});
+  for (let i = 0; i < initialCatalog.length; i++) {
+    const x = {...initialCatalog[i], order:i};
+    await setDoc(doc(db,"products",x.id), x);
+  }
 }
 
 async function saveCatalog(){
-  if(!isAdmin||auth.currentUser?.uid!==ADMIN_UID){alert("پێویستە وەک Admin بچیتە ژوورەوە.");return}
+  if(!isAdmin || auth.currentUser?.uid !== ADMIN_UID){
+    alert("پێویستە وەک Admin بچیتە ژوورەوە.");
+    return;
+  }
+
   try{
-    const old=await getDocs(productsRef),batch=writeBatch(db);
-    const desiredIds=new Set(catalog.map((x,i)=>x.id||("p-"+Date.now()+"-"+i)));
-    old.forEach(d=>{
-      if(d.id!=="__meta__"&&!desiredIds.has(d.id))batch.delete(d.ref);
-    });
-    batch.set(doc(db,"products","__meta__"),{hidden:true,initialized:true});
+    const old = await getDocs(productsRef);
+    const desiredIds = new Set();
+
     catalog.forEach((x,i)=>{
-      const id=x.id||("p-"+Date.now()+"-"+i);
-      x.id=id;
-      batch.set(doc(db,"products",id),{
-        id,order:i,name:String(x.name||"").trim(),
-        price:String(x.price||"").replace(/[^\d.]/g,""),
-        offer:String(x.offer||"").replace(/[^\d]/g,""),
-        image:String(x.image||""),
-        whatsapp:String(x.whatsapp||"9647504911742").replace(/\D/g,"")
-      });
+      if(!x.id) x.id = "p-" + Date.now() + "-" + i;
+      desiredIds.add(x.id);
     });
-    await batch.commit();
+
+    for (const d of old.docs) {
+      if (d.id !== "__meta__" && !desiredIds.has(d.id)) {
+        await deleteDoc(d.ref);
+      }
+    }
+
+    await setDoc(doc(db,"products","__meta__"), {hidden:true, initialized:true});
+
+    for (let i = 0; i < catalog.length; i++) {
+      const x = catalog[i];
+      const clean = {
+        id: x.id,
+        order: i,
+        name: String(x.name || "").trim(),
+        price: String(x.price || "").replace(/[^\d.]/g,""),
+        offer: String(x.offer || "").replace(/[^\d]/g,""),
+        image: String(x.image || ""),
+        whatsapp: String(x.whatsapp || "9647504911742").replace(/\D/g,"")
+      };
+
+      // Firestore documents must stay below 1 MiB.
+      if (clean.image.length > 850000) {
+        throw Object.assign(
+          new Error("Image is too large for a Firestore document. Choose a smaller image."),
+          {code:"image-too-large"}
+        );
+      }
+
+      await setDoc(doc(db,"products",clean.id), clean);
+    }
+
     alert("گۆڕانکارییەکان لە Firebase پاشەکەوت کران ✓");
   }catch(err){
-    console.error(err);
-    alert("پاشەکەوتکردن سەرکەوتوو نەبوو. Firestore Rules یان ئینتەرنێت بپشکنە.");
+    console.error("SAVE ERROR:", err);
+    const code = err?.code || "unknown";
+    const message = err?.message || String(err);
+    alert("پاشەکەوتکردن سەرکەوتوو نەبوو.
+
+Error: " + code + "
+" + message);
   }
 }
 
