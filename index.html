@@ -261,7 +261,7 @@ function readInitialCatalog(){
       id:"initial-"+String(i+1).padStart(3,"0"),
       order:i,
       name,
-      price:(card.querySelector(".price")?.textContent||"").replace(/[^\d]/g,""),
+      price:(card.querySelector(".price")?.textContent||"").replace(/[^\d.]/g,""),
       offer:(card.querySelector(".offer")?.textContent||"").replace(/[^\d]/g,""),
       image:img?.getAttribute("src")||"",
       whatsapp:"9647504911742"
@@ -278,7 +278,7 @@ function renderCatalog(){
   const box=document.getElementById("products");
   if(!box)return;
   box.innerHTML=catalog.map((x,i)=>{
-    const price=x.price ? Number(x.price).toLocaleString()+" IQD" : langText[currentLang].price;
+    const price=x.price ? "$"+Number(x.price).toLocaleString(undefined,{maximumFractionDigits:2}) : langText[currentLang].price;
     const offer=x.offer ? escapeHtml(x.offer)+"% OFF" : "";
     const safeName=escapeHtml(x.name||("Perfume "+(i+1)));
     const safeImg=escapeAttr(x.image||"");
@@ -396,7 +396,7 @@ function renderAdmin(){
         <label class="filelabel">وێنە هەڵبژێرە<input type="file" accept="image/*" onchange="pickImage(event,${i})"></label>
       </div>
       <input class="wide" value="${escapeAttr(x.name||"")}" placeholder="ناوی بۆن" oninput="updateItem(${i},'name',this.value)">
-      <input type="number" value="${escapeAttr(x.price||"")}" placeholder="نرخ IQD" oninput="updateItem(${i},'price',this.value)">
+      <input type="number" step="0.01" min="0" value="${escapeAttr(x.price||"")}" placeholder="نرخ $" oninput="updateItem(${i},'price',this.value)">
       <input type="number" min="0" max="100" value="${escapeAttr(x.offer||"")}" placeholder="Offer %" oninput="updateItem(${i},'offer',this.value)">
       <button class="danger" type="button" onclick="deleteItem(${i})">سڕینەوە</button>
       <input class="wide" value="${escapeAttr(x.image||"")}" placeholder="Image URL / images/file.jpg" oninput="updateItem(${i},'image',this.value)">
@@ -458,7 +458,7 @@ async function saveCatalog(){
       x.id=id;
       batch.set(doc(db,"products",id),{
         id,order:i,name:String(x.name||"").trim(),
-        price:String(x.price||"").replace(/[^\d]/g,""),
+        price:String(x.price||"").replace(/[^\d.]/g,""),
         offer:String(x.offer||"").replace(/[^\d]/g,""),
         image:String(x.image||""),
         whatsapp:String(x.whatsapp||"9647504911742").replace(/\D/g,"")
