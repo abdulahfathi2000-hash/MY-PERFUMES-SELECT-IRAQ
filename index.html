@@ -160,18 +160,215 @@
       </div>
     </article></div></div></section>
 <footer>MY PERFUMES SELECT IRAQ<br><br>WhatsApp: +964 750 491 1742</footer>
-<button class="secret" onclick="openAdmin()">A</button>
-<div class="admin" id="admin"><div class="panel"><button onclick="closeAdmin()">✕</button><h2>ADMIN</h2><div id="login"><input id="email" placeholder="Admin email"><input id="pw" type="password" placeholder="Password" style="margin-top:8px"><button class="save" onclick="login()">Login</button></div><div id="editor" style="display:none"><div class="row"><b>Amber Fanatic EDP</b><input id="p-0" type="number" placeholder="IQD"><input id="o-0" type="number" placeholder="Offer %"></div><div class="row"><b>Aux Fleurs De Safran EDP</b><input id="p-1" type="number" placeholder="IQD"><input id="o-1" type="number" placeholder="Offer %"></div><div class="row"><b>Bois D&#x27; Iris EDP</b><input id="p-2" type="number" placeholder="IQD"><input id="o-2" type="number" placeholder="Offer %"></div><div class="row"><b>Gateau D&#x27; Iris EDP</b><input id="p-3" type="number" placeholder="IQD"><input id="o-3" type="number" placeholder="Offer %"></div><div class="row"><b>Golden Saffron EDP</b><input id="p-4" type="number" placeholder="IQD"><input id="o-4" type="number" placeholder="Offer %"></div><div class="row"><b>Intense Orris EDP</b><input id="p-5" type="number" placeholder="IQD"><input id="o-5" type="number" placeholder="Offer %"></div><div class="row"><b>Intense Sandal EDP</b><input id="p-6" type="number" placeholder="IQD"><input id="o-6" type="number" placeholder="Offer %"></div><div class="row"><b>Mysterious Oud EDP</b><input id="p-7" type="number" placeholder="IQD"><input id="o-7" type="number" placeholder="Offer %"></div><div class="row"><b>Nude Rose EDP</b><input id="p-8" type="number" placeholder="IQD"><input id="o-8" type="number" placeholder="Offer %"></div><div class="row"><b>Oriental Jasmine EDP</b><input id="p-9" type="number" placeholder="IQD"><input id="o-9" type="number" placeholder="Offer %"></div><div class="row"><b>Oud Nectar EDP 100ML</b><input id="p-10" type="number" placeholder="IQD"><input id="o-10" type="number" placeholder="Offer %"></div><div class="row"><b>Rustic Oud EDP</b><input id="p-11" type="number" placeholder="IQD"><input id="o-11" type="number" placeholder="Offer %"></div><div class="row"><b>Smoky Jasmine EDP</b><input id="p-12" type="number" placeholder="IQD"><input id="o-12" type="number" placeholder="Offer %"></div><div class="row"><b>Terre De Santal EDP</b><input id="p-13" type="number" placeholder="IQD"><input id="o-13" type="number" placeholder="Offer %"></div><div class="row"><b>Warm Patchouli EDP</b><input id="p-14" type="number" placeholder="IQD"><input id="o-14" type="number" placeholder="Offer %"></div><button class="save" onclick="save()">SAVE</button></div></div></div>
+
+<style>
+.admin-fab{position:fixed;left:18px;bottom:18px;z-index:15;border:0;background:#123b32;color:#fff;width:48px;height:48px;border-radius:50%;font-size:20px;box-shadow:0 8px 28px #0003;cursor:pointer}
+.admin{display:none;position:fixed;inset:0;background:#071b18ee;z-index:100;padding:14px;overflow:auto}
+.panel{background:#fff;max-width:1050px;margin:18px auto;padding:18px;border-radius:20px;box-shadow:0 25px 70px #0005}
+.admin-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
+.admin-head h2{margin:0;font-size:28px;text-align:right}
+.xbtn,.danger,.secondary,.primary{border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+.xbtn{background:#eee}.primary{background:#123b32;color:#fff}.secondary{background:#efe9df;color:#123b32}.danger{background:#a02a35;color:#fff}
+.admin-login{max-width:440px;margin:30px auto;display:grid;gap:10px}
+.admin-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.admin-card{border:1px solid #e9e1d6;border-radius:14px;padding:12px;margin:10px 0;display:grid;grid-template-columns:90px 1.4fr 1fr 1fr auto;gap:8px;align-items:center}
+.admin-card img{width:90px;height:90px;object-fit:contain;background:#f7f2e9;border-radius:10px}
+.admin-card input{min-width:0}
+.admin-card .imgbox{display:grid;gap:5px}
+.admin-note{font-size:12px;color:#6d7773;line-height:1.7;background:#f7f2e9;padding:10px;border-radius:10px;margin:10px 0}
+.filelabel{display:block;text-align:center;padding:7px;background:#efe9df;border-radius:8px;font-size:12px;cursor:pointer}
+.filelabel input{display:none}
+@media(max-width:760px){
+ .panel{padding:12px}
+ .admin-card{grid-template-columns:72px 1fr 1fr}
+ .admin-card img{width:72px;height:72px}
+ .admin-card .imgbox{grid-row:span 2}
+ .admin-card .wide{grid-column:2/-1}
+ .admin-card .danger{grid-column:1/-1}
+}
+</style>
+
+<button class="admin-fab" type="button" onclick="openAdmin()" aria-label="Admin">⚙</button>
+
+<div class="admin" id="admin">
+  <div class="panel">
+    <div class="admin-head">
+      <h2>Admin Panel</h2>
+      <button class="xbtn" type="button" onclick="closeAdmin()">✕</button>
+    </div>
+
+    <div id="login" class="admin-login">
+      <input id="email" type="email" placeholder="Admin email">
+      <input id="pw" type="password" placeholder="Password">
+      <button class="primary" type="button" onclick="login()">Login</button>
+      <div class="admin-note">ئەم وەشانە Admin ـەکە بۆ دەستکاری ناو، نرخ، داشکاندن، وێنە، زیادکردن و سڕینەوەی ئایتمەکانە.</div>
+    </div>
+
+    <div id="editor" style="display:none">
+      <div class="admin-toolbar">
+        <button class="primary" type="button" onclick="addItem()">＋ زیادکردنی ئایتم</button>
+        <button class="secondary" type="button" onclick="saveCatalog()">💾 پاشەکەوت</button>
+        <button class="secondary" type="button" onclick="resetCatalog()">↺ گەڕاندنەوە بۆ سەرەتا</button>
+      </div>
+      <div class="admin-note">
+        وێنە دەتوانیت بە URL یان بە هەڵبژاردنی فایل بگۆڕیت. گۆڕانکارییەکانی ئەم وەشانە لە browser ـەکەت پاشەکەوت دەبن.
+      </div>
+      <div id="adminItems"></div>
+    </div>
+  </div>
+</div>
+
 <script>
+const ADMIN_EMAIL='handren.saad@gmail.com';
 let currentLang=localStorage.getItem('mps-lang')||'ku';
-const langText={ku:{top:'نوێنەری My Perfumes Select لە عێراق • هەولێر - گولان مۆڵ',title:'هەستێکی تایبەت، بۆنێکی لەبیرنەکراو',search:'گەڕان بە ناوی بۆن...',f1b:'✨ بۆنی هەڵبژێردراو',f1s:'کۆمەڵە بۆنێکی تایبەت و لوکس',f2b:'📍 هەولێر',f2s:'خزمەتگوزاری لە عێراق',f3b:'💬 داواکاری بە WhatsApp',f3s:'بە خێرایی پەیوەندیمان پێوە بکە',sub:'بۆنی خۆت هەڵبژێرە و بە یەک کلیک داوای بکە',empty:'هیچ بۆنێک نەدۆزرایەوە.',order:'داواکردن لە WhatsApp',price:'نرخ دابنێ',btn:'عربي'},ar:{top:'الممثل الرسمي لـ My Perfumes Select في العراق • أربيل - كولان مول',title:'إحساس مميز، وعطر لا يُنسى',search:'ابحث باسم العطر...',f1b:'✨ عطور مختارة',f1s:'مجموعة عطور مميزة وفاخرة',f2b:'📍 أربيل',f2s:'خدمة متوفرة في العراق',f3b:'💬 اطلب عبر WhatsApp',f3s:'تواصل معنا بسرعة وسهولة',sub:'اختر عطرك واطلبه بنقرة واحدة',empty:'لم يتم العثور على أي عطر.',order:'اطلب عبر WhatsApp',price:'السعر قريباً',btn:'کوردی'}};
-function setLang(lang){currentLang=lang;localStorage.setItem('mps-lang',lang);const t=langText[lang];document.documentElement.lang=lang==='ar'?'ar':'ku';document.documentElement.dir='rtl';document.getElementById('topText').textContent=t.top;document.getElementById('heroTitle').textContent=t.title;document.getElementById('searchBox').placeholder=t.search;['f1b','f1s','f2b','f2s','f3b','f3s'].forEach(id=>document.getElementById(id).textContent=t[id]);document.getElementById('sectionSub').textContent=t.sub;document.getElementById('empty').textContent=t.empty;document.getElementById('langBtn').textContent=t.btn;document.querySelectorAll('[data-order]').forEach(a=>a.textContent=t.order);document.querySelectorAll('.price').forEach(p=>{if(!/IQD/.test(p.textContent))p.textContent=t.price});}
+
+const langText={
+ ku:{top:'نوێنەری My Perfumes Select لە عێراق • هەولێر - گولان مۆڵ',title:'هەستێکی تایبەت، بۆنێکی لەبیرنەکراو',search:'گەڕان بە ناوی بۆن...',f1b:'✨ بۆنی هەڵبژێردراو',f1s:'کۆمەڵە بۆنێکی تایبەت و لوکس',f2b:'📍 هەولێر',f2s:'خزمەتگوزاری لە عێراق',f3b:'💬 داواکاری بە WhatsApp',f3s:'بە خێرایی پەیوەندیمان پێوە بکە',sub:'بۆنی خۆت هەڵبژێرە و بە یەک کلیک داوای بکە',empty:'هیچ بۆنێک نەدۆزرایەوە.',order:'داواکردن لە WhatsApp',price:'نرخ دابنێ',btn:'عربي'},
+ ar:{top:'الممثل الرسمي لـ My Perfumes Select في العراق • أربيل - كولان مول',title:'إحساس مميز، وعطر لا يُنسى',search:'ابحث باسم العطر...',f1b:'✨ عطور مختارة',f1s:'مجموعة عطور مميزة وفاخرة',f2b:'📍 أربيل',f2s:'خدمة داخل العراق',f3b:'💬 الطلب عبر WhatsApp',f3s:'تواصل معنا بسرعة',sub:'اختر عطرك واطلبه بنقرة واحدة',empty:'لم يتم العثور على عطر.',order:'اطلب عبر WhatsApp',price:'أضف السعر',btn:'کوردی'}
+};
+
+function setLang(lang){
+ currentLang=lang; localStorage.setItem('mps-lang',lang);
+ const t=langText[lang];
+ document.documentElement.lang=lang==='ar'?'ar':'ku';
+ document.documentElement.dir='rtl';
+ const map={topText:'top',heroTitle:'title',f1b:'f1b',f1s:'f1s',f2b:'f2b',f2s:'f2s',f3b:'f3b',f3s:'f3s',sectionSub:'sub',empty:'empty'};
+ Object.entries(map).forEach(([id,k])=>{let e=document.getElementById(id); if(e)e.textContent=t[k]});
+ let q=document.getElementById('searchBox'); if(q)q.placeholder=t.search;
+ let b=document.getElementById('langBtn'); if(b)b.textContent=t.btn;
+ document.querySelectorAll('.order').forEach(a=>a.textContent=t.order);
+ renderCatalog();
+}
 function toggleLang(){setLang(currentLang==='ku'?'ar':'ku')}
-document.addEventListener('DOMContentLoaded',()=>{setLang(currentLang);const q=document.getElementById('searchBox'),cards=[...document.querySelectorAll('.product')],empty=document.getElementById('empty');if(q)q.addEventListener('input',()=>{const v=q.value.trim().toLowerCase();let n=0;cards.forEach(c=>{const ok=c.innerText.toLowerCase().includes(v);c.style.display=ok?'':'none';if(ok)n++});if(empty)empty.style.display=n?'none':'block'})});
-function openAdmin(){document.getElementById('admin').style.display='block'} function closeAdmin(){document.getElementById('admin').style.display='none'}
-function login(){if(document.getElementById('email').value.trim()!=='handren.saad@gmail.com'||!document.getElementById('pw').value){alert('Login information هەڵەیە');return}document.getElementById('login').style.display='none';document.getElementById('editor').style.display='block';load()}
-function save(){let d=[];for(let i=0;i<15;i++)d.push({p:document.getElementById('p-'+i).value,o:document.getElementById('o-'+i).value});localStorage.setItem('mps-prices',JSON.stringify(d));apply(d);alert('Saved')}
-function load(){let d=JSON.parse(localStorage.getItem('mps-prices')||'[]');d.forEach((x,i)=>{if(document.getElementById('p-'+i)){document.getElementById('p-'+i).value=x.p||'';document.getElementById('o-'+i).value=x.o||''}})}
-function apply(d){d.forEach((x,i)=>{let p=document.getElementById('price-'+i),o=document.getElementById('offer-'+i);if(p&&x.p)p.textContent=Number(x.p).toLocaleString()+' IQD';if(o)o.textContent=x.o?x.o+'% OFF':''})}
-apply(JSON.parse(localStorage.getItem('mps-prices')||'[]'));
+
+function readInitialCatalog(){
+ return [...document.querySelectorAll('#products .product')].map((card,i)=>{
+   const img=card.querySelector('img');
+   const name=card.querySelector('h3')?.textContent.trim()||('Perfume '+(i+1));
+   const priceEl=card.querySelector('.price');
+   const offerEl=card.querySelector('.offer');
+   return {
+     id: Date.now()+i,
+     name,
+     price: (priceEl?.textContent||'').replace(/[^\d]/g,''),
+     offer: (offerEl?.textContent||'').replace(/[^\d]/g,''),
+     image: img?.getAttribute('src')||'',
+     whatsapp:'9647504911742'
+   };
+ });
+}
+
+let initialCatalog=[];
+let catalog=[];
+
+function loadCatalog(){
+ initialCatalog=readInitialCatalog();
+ try{
+   const saved=JSON.parse(localStorage.getItem('mps-catalog')||'null');
+   catalog=Array.isArray(saved)&&saved.length?saved:initialCatalog;
+ }catch(e){ catalog=initialCatalog; }
+ // migrate old saved prices
+ try{
+   const old=JSON.parse(localStorage.getItem('mps-prices')||'[]');
+   if(!localStorage.getItem('mps-catalog') && Array.isArray(old)){
+     old.forEach((x,i)=>{if(catalog[i]){catalog[i].price=x.p||catalog[i].price;catalog[i].offer=x.o||catalog[i].offer}});
+   }
+ }catch(e){}
+}
+
+function renderCatalog(){
+ const box=document.getElementById('products'); if(!box)return;
+ box.innerHTML=catalog.map((x,i)=>{
+   const price=x.price?Number(x.price).toLocaleString()+' IQD':langText[currentLang].price;
+   const offer=x.offer?x.offer+'% OFF':'';
+   const msg=encodeURIComponent('My Perfumes Select Iraq - '+x.name);
+   const safeName=escapeHtml(x.name);
+   const safeImg=escapeAttr(x.image||'');
+   return `<article class="product" data-i="${i}">
+     <div class="pic">${safeImg?`<img src="${safeImg}" alt="${safeName}" loading="lazy" onerror="this.style.display='none'">`:`<div class="bottle">${safeName}</div>`}</div>
+     <div class="body"><h3>${safeName}</h3>
+       <div class="price">${price}</div>
+       <div class="offer">${offer}</div>
+       <a class="order" href="https://wa.me/${x.whatsapp||'9647504911742'}?text=${msg}" target="_blank" rel="noopener">${langText[currentLang].order}</a>
+     </div></article>`;
+ }).join('');
+ bindSearch();
+}
+
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function escapeAttr(s){return escapeHtml(s)}
+
+function bindSearch(){
+ const q=document.getElementById('searchBox'), empty=document.getElementById('empty');
+ if(!q)return;
+ q.oninput=()=>{
+   const v=q.value.trim().toLowerCase(); let n=0;
+   document.querySelectorAll('#products .product').forEach(c=>{
+     const ok=c.innerText.toLowerCase().includes(v); c.style.display=ok?'':'none'; if(ok)n++;
+   });
+   if(empty)empty.style.display=n?'none':'block';
+ };
+}
+
+function openAdmin(){document.getElementById('admin').style.display='block'}
+function closeAdmin(){document.getElementById('admin').style.display='none'}
+
+function login(){
+ const email=document.getElementById('email').value.trim().toLowerCase();
+ const pw=document.getElementById('pw').value;
+ if(email!==ADMIN_EMAIL || !pw){alert('Login information هەڵەیە');return}
+ document.getElementById('login').style.display='none';
+ document.getElementById('editor').style.display='block';
+ renderAdmin();
+}
+
+function renderAdmin(){
+ const box=document.getElementById('adminItems');
+ box.innerHTML=catalog.map((x,i)=>`
+   <div class="admin-card">
+     <div class="imgbox">
+       <img src="${escapeAttr(x.image||'')}" alt="" onerror="this.style.opacity=.25">
+       <label class="filelabel">وێنە هەڵبژێرە<input type="file" accept="image/*" onchange="pickImage(event,${i})"></label>
+     </div>
+     <input class="wide" value="${escapeAttr(x.name)}" placeholder="ناوی بۆن" oninput="catalog[${i}].name=this.value">
+     <input type="number" value="${escapeAttr(x.price)}" placeholder="نرخ IQD" oninput="catalog[${i}].price=this.value">
+     <input type="number" min="0" max="100" value="${escapeAttr(x.offer)}" placeholder="Offer %" oninput="catalog[${i}].offer=this.value">
+     <button class="danger" type="button" onclick="deleteItem(${i})">سڕینەوە</button>
+     <input class="wide" value="${escapeAttr(x.image||'')}" placeholder="Image URL / images/file.jpg" oninput="catalog[${i}].image=this.value">
+   </div>`).join('');
+}
+
+function pickImage(ev,i){
+ const f=ev.target.files&&ev.target.files[0]; if(!f)return;
+ const r=new FileReader();
+ r.onload=()=>{catalog[i].image=r.result;renderAdmin()};
+ r.readAsDataURL(f);
+}
+
+function addItem(){
+ catalog.unshift({id:Date.now(),name:'New Perfume',price:'',offer:'',image:'',whatsapp:'9647504911742'});
+ renderAdmin();
+}
+
+function deleteItem(i){
+ if(confirm('دڵنیایت لە سڕینەوەی ئەم ئایتمە؟')){catalog.splice(i,1);renderAdmin()}
+}
+
+function saveCatalog(){
+ localStorage.setItem('mps-catalog',JSON.stringify(catalog));
+ renderCatalog();
+ alert('گۆڕانکارییەکان پاشەکەوت کران ✓');
+}
+
+function resetCatalog(){
+ if(!confirm('هەموو گۆڕانکارییەکان بگەڕێنرێنەوە؟'))return;
+ localStorage.removeItem('mps-catalog');
+ location.reload();
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+ loadCatalog();
+ renderCatalog();
+ setLang(currentLang);
+});
 </script></body></html>
